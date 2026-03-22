@@ -82,6 +82,6 @@ def format_date_display(date_str: str) -> str:
     """Convert 'YYYY-MM-DD' or 'MM-DD' to 'Month D' (e.g. 'May 14')."""
     if len(date_str) == 10:  # YYYY-MM-DD
         d = datetime.strptime(date_str, "%Y-%m-%d")
-    else:  # MM-DD
-        d = datetime.strptime(date_str, "%m-%d")
-    return d.strftime("%b %-d")  # e.g. "May 14"
+    else:  # MM-DD — use year 2000 (leap year) to avoid strptime ambiguity (Python 3.15+)
+        d = datetime.strptime(f"2000-{date_str}", "%Y-%m-%d")
+    return f"{d.strftime('%b')} {d.day}"  # portable: "May 14" without %-d
