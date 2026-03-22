@@ -1,7 +1,7 @@
 from datetime import timedelta, date, datetime
 from src.utils import now_et, format_date_display
 from src.saturday import get_next_saturdays_after
-from src.chat.cards import build_vote_card, build_voting_closed_card
+from src.chat.cards import build_vote_card
 
 
 def _get_param(event, key):
@@ -112,14 +112,13 @@ def handle_pick_another(event, plans_store, chat_client):
     new_deadline = (now + timedelta(hours=48)).isoformat()
     deadline_display = _format_deadline(new_deadline)
 
+    card = build_vote_card(plan_id, plan["birthday_person_name"], new_options,
+                           plan["members"], {}, plan.get("member_names", {}), deadline_display)
+    msg = chat_client.post_message(space_name, card=card)
+
     plans_store.update(plan_id, {
         "options": new_options,
         "votes": {},
         "voting_deadline": new_deadline,
-        "status": "voting",
+        "tally_message_name": msg["name"],
     })
-
-    card = build_vote_card(plan_id, plan["birthday_person_name"], new_options,
-                           plan["members"], {}, plan.get("member_names", {}), deadline_display)
-    msg = chat_client.post_message(space_name, card=card)
-    plans_store.update(plan_id, {"tally_message_name": msg["name"]})

@@ -1,6 +1,5 @@
 # tests/test_vote_handler.py
 from unittest.mock import MagicMock, patch
-import pytest
 from src.interactions.vote_handler import handle_vote_toggle, handle_vote_none, handle_confirm, handle_pick_another
 
 
@@ -114,3 +113,33 @@ def test_pick_another():
 
     p_store.update.assert_called()
     chat.post_message.assert_called_once()
+    # Verify the update was called with the new options and tally_message_name
+    update_call = p_store.update.call_args_list[-1]
+    update_data = update_call[0][1]
+    assert update_data["options"] == ["2026-05-30", "2026-06-06", "2026-06-13"]
+    assert update_data["votes"] == {}
+    assert update_data["tally_message_name"] == "spaces/AAA/messages/NEW"
+
+
+def test_vote_toggle_noop_when_status_not_voting():
+    p_store = MagicMock()
+    p_store.get.return_value = make_plan(status="tallied")
+    chat = MagicMock()
+
+    event = make_click_event("handle_vote_toggle", {"plan_id": PLAN_ID, "date": "2026-05-09"})
+    handle_vote_toggle(event, p_store, chat)
+
+    p_store.update.assert_not_called()
+    chat.update_message.assert_not_called()
+
+
+def test_vote_none_noop_when_plan_not_found():
+    p_store = MagicMock()
+    p_store.get.return_value = None
+    chat = MagicMock()
+
+    event = make_click_event("handle_vote_none", {"plan_id": PLAN_ID})
+    handle_vote_none(event, p_store, chat)
+
+    p_store.update.assert_not_called()
+    chat.update_message.assert_not_called()
