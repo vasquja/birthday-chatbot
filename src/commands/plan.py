@@ -51,14 +51,15 @@ def handle_plan(event, birthdays_store, plans_store, chat_client) -> dict:
     member_names = {m["name"]: m["displayName"] for m in raw_members}
 
     # Compute candidate Saturdays from the birthday date
-    month, day = int(birthday.split("-")[0]), int(birthday.split("-")[1])
+    month, day = map(int, birthday.split("-"))
     if month == 2 and day == 29 and not calendar.isleap(year):
         month, day = 3, 1
     bday_date = ddate(year, month, day)
     options = get_candidate_saturdays(bday_date)
 
     # Deadline: 48 hours from now
-    deadline_dt = now_et() + timedelta(hours=48)
+    now = now_et()
+    deadline_dt = now + timedelta(hours=48)
     deadline_str = deadline_dt.isoformat()
     # Format deadline for display — use portable format
     deadline_display = f"{deadline_dt.strftime('%a %b')} {deadline_dt.day}, {deadline_dt.strftime('%I').lstrip('0')} {deadline_dt.strftime('%p')} ET"
@@ -75,7 +76,7 @@ def handle_plan(event, birthdays_store, plans_store, chat_client) -> dict:
         "confirmed_date": None,
         "voting_deadline": deadline_str,
         "tally_message_name": None,
-        "created_at": now_et().isoformat(),
+        "created_at": now.isoformat(),
     }
     plans_store.create(plan_id, plan_data)
 

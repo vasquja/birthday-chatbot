@@ -46,6 +46,31 @@ def test_plan_vote_active():
     assert "already running" in response["text"]
 
 
+def test_plan_tallied():
+    b_store = MagicMock()
+    b_store.get.return_value = {"birthday": "05-14", "display_name": "Jason"}
+    p_store = MagicMock()
+    p_store.get_for_person_year.return_value = {
+        "status": "tallied", "tally_message_name": "spaces/AAA/messages/BBB"
+    }
+    event = make_event([make_mention("users/123", "Jason")])
+    response = handle_plan(event, b_store, p_store, MagicMock())
+    assert "confirm" in response["text"].lower()
+
+
+def test_plan_confirmed():
+    b_store = MagicMock()
+    b_store.get.return_value = {"birthday": "05-14", "display_name": "Jason"}
+    p_store = MagicMock()
+    p_store.get_for_person_year.return_value = {
+        "status": "confirmed", "confirmed_date": "2026-05-09", "tally_message_name": None
+    }
+    event = make_event([make_mention("users/123", "Jason")])
+    response = handle_plan(event, b_store, p_store, MagicMock())
+    assert "confirmed" in response["text"].lower()
+    assert "May 9" in response["text"]
+
+
 def test_plan_creates_plan():
     b_store = MagicMock()
     b_store.get.return_value = {"birthday": "05-14", "display_name": "Jason", "user_id": "users/123"}
@@ -72,5 +97,11 @@ def test_plan_creates_plan():
         response = handle_plan(event, b_store, p_store, chat)
 
     p_store.create.assert_called_once()
+    created_plan_id, created_data = p_store.create.call_args[0]
+    assert created_plan_id == "users-123-2026"
+    assert created_data["status"] == "voting"
+    assert created_data["votes"] == {}
+    assert created_data["birthday_person_id"] == "users/123"
+    assert created_data["options"] == ["2026-05-09", "2026-05-16", "2026-05-23"]
     chat.post_message.assert_called_once()
-    assert "vote" in response["text"].lower() or "cardsV2" in str(response)
+    assert "vote" in response["text"].lower()
