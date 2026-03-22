@@ -30,7 +30,7 @@ def make_mention(user_id, display_name, start_index):
 
 # /addbirthday tests
 
-def test_add_birthday_success(mock_firestore, mock_chat_client):
+def test_add_birthday_success():
     store = MagicMock()
     store.upsert.return_value = "Added"
     event = make_event(
