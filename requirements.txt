@@ -1,0 +1,7 @@
+functions-framework==3.*
+google-cloud-firestore==2.*
+google-auth==2.*
+google-api-python-client==2.*
+requests==2.*
+pytest==8.*
+pytest-mock==3.*
