@@ -15,7 +15,8 @@ class BirthdaysStore:
         return doc.to_dict() if doc.exists else None
 
     def upsert(self, user_id: str, display_name: str, birthday: str, birth_year: int | None = None) -> str:
-        """Create or overwrite birthday doc. Returns 'Added' or 'Updated'."""
+        """Create or update birthday doc. Returns 'Added' or 'Updated'.
+        On update, last_reminded_date and last_birthday_wish_date are preserved."""
         ref = self._doc_ref(user_id)
         existing = ref.get()
         verb = "Updated" if existing.exists else "Added"
@@ -24,13 +25,16 @@ class BirthdaysStore:
             "user_id": user_id,
             "display_name": display_name,
             "birthday": birthday,
-            "last_reminded_date": None,
-            "last_birthday_wish_date": None,
         }
         if birth_year is not None:
             data["birth_year"] = birth_year
 
-        ref.set(data)
+        if verb == "Added":
+            data["last_reminded_date"] = None
+            data["last_birthday_wish_date"] = None
+            ref.set(data)
+        else:
+            ref.update(data)
         return verb
 
     def get_all_sorted(self) -> list[dict]:

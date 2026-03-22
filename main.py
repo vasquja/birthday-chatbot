@@ -1,4 +1,5 @@
 import os
+import logging
 import functions_framework
 from flask import jsonify
 
@@ -106,7 +107,7 @@ def _handle_card_click(function_name, event):
         elif function_name == ACTION_PICK_ANOTHER:
             handle_pick_another(event, plans_store, chat_client)
     except Exception:
-        pass  # Always return {} to acknowledge the card click
+        logging.exception("Unhandled error in card click handler")
     return {}
 
 
