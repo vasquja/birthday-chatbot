@@ -1962,6 +1962,12 @@ def _get_param(event, key):
 def _update_tally_card(plan, plan_id, plans_store, chat_client, space_name):
     """Refresh the tally card after a vote change."""
     from src.chat.cards import build_vote_card
+    from datetime import datetime
+    deadline_raw = plan.get("voting_deadline", "")
+    try:
+        deadline_display = datetime.fromisoformat(deadline_raw).strftime("%a %b %-d, %-I %p ET")
+    except (ValueError, TypeError):
+        deadline_display = "48 hours"
     card = build_vote_card(
         plan_id,
         plan["birthday_person_name"],
@@ -1969,7 +1975,7 @@ def _update_tally_card(plan, plan_id, plans_store, chat_client, space_name):
         plan["members"],
         plan["votes"],
         plan.get("member_names", {}),
-        "deadline",
+        deadline_display,
     )
     try:
         chat_client.update_message(plan["tally_message_name"], card)
@@ -2247,7 +2253,7 @@ git commit -m "feat: vote tally computation"
   {"name": "Porter House Bar and Grill", "neighborhood": "Midtown", "google_rating": 4.4, "price_level": 4, "opentable_id": "31350", "resy_slug": "porter-house-bar-and-grill-new-york"},
   {"name": "Cote Korean Steakhouse", "neighborhood": "Flatiron", "google_rating": 4.5, "price_level": 3, "opentable_id": null, "resy_slug": "cote-new-york"},
   {"name": "The Smith", "neighborhood": "Midtown East", "google_rating": 4.3, "price_level": 2, "opentable_id": "62701", "resy_slug": null},
-  {"name": "Le Relais de Venise L'Entrecote", "neighborhood": "Midtown East", "google_rating": 4.4, "price_level": 2, "opentable_id": null, "resy_slug": null}
+  {"name": "Lure Fishbar", "neighborhood": "SoHo", "google_rating": 4.3, "price_level": 3, "opentable_id": "60220", "resy_slug": null}
 ]
 ```
 
