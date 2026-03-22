@@ -71,15 +71,32 @@ def build_vote_card(plan_id, person_name, options, members, votes, member_names,
 
 def build_voting_closed_card(plan_id, options):
     """Disabled vote card shown after the deadline passes."""
-    date_labels = ", ".join(format_date_display(o) for o in options)
+    disabled_buttons = []
+    for opt in options:
+        disabled_buttons.append({
+            "text": format_date_display(opt),
+            "disabled": True,
+            "onClick": {"action": {"function": ACTION_VOTE, "parameters": [_param("plan_id", plan_id), _param("date", opt)]}},
+        })
+    disabled_buttons.append({
+        "text": "None of these work",
+        "disabled": True,
+        "onClick": {"action": {"function": ACTION_VOTE_NONE, "parameters": [_param("plan_id", plan_id)]}},
+    })
     return {
         "cardsV2": [{
             "cardId": f"vote-closed-{plan_id}",
             "card": {
-                "header": {"title": "Voting Closed", "subtitle": date_labels},
-                "sections": [{
-                    "widgets": [{"textParagraph": {"text": "⏰ The voting window has closed. See below for results."}}]
-                }],
+                "header": {"title": "Voting Closed"},
+                "sections": [
+                    {
+                        "widgets": [{"textParagraph": {"text": "⏰ The voting window has closed. See below for results."}}]
+                    },
+                    {
+                        "header": "Options that were voted on:",
+                        "widgets": [{"buttonList": {"buttons": disabled_buttons}}],
+                    },
+                ],
             },
         }]
     }

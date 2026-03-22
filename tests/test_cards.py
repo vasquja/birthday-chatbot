@@ -48,6 +48,9 @@ def test_voting_closed_card():
     card = build_voting_closed_card(PLAN_ID, OPTIONS)
     assert "cardsV2" in card
     assert "closed" in str(card).lower()
+    # Buttons are disabled but still rendered
+    assert "disabled" in str(card)
+    assert "Apr 25" in str(card)
 
 
 def test_tally_card_winner():
