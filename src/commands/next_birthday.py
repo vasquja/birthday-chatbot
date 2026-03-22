@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from src.utils import days_until_birthday, format_date_display, today_et
 
 
@@ -16,7 +18,7 @@ def handle_next(birthdays_store, plans_store) -> dict:
         return {"text": f"Today is {names}'s birthday! 🎂 Use `/plan @{tied[0]['display_name']}` to organize a dinner."}
 
     label = format_date_display(first["birthday"])
-    year = today_et().year if days > 0 else today_et().year + 1
+    year = (today_et() + timedelta(days=days)).year
 
     if len(tied) > 1:
         names = " and ".join(d["display_name"] for d in tied)

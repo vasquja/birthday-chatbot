@@ -41,6 +41,7 @@ def test_next_today_is_birthday():
         response = handle_next(b_store, p_store)
 
     assert "today" in response["text"].lower()
+    p_store.get_for_person_year.assert_not_called()
 
 
 def test_next_with_confirmed_plan():
@@ -59,4 +60,4 @@ def test_next_with_confirmed_plan():
         mock_today.return_value = date(2026, 3, 21)
         response = handle_next(b_store, p_store)
 
-    assert "confirmed" in response["text"].lower() or "May 3" in response["text"]
+    assert "confirmed" in response["text"].lower() and "May 3" in response["text"]
