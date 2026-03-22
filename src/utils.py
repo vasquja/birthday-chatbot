@@ -51,7 +51,7 @@ def parse_birthday(date_str: str) -> tuple[int, int, int | None]:
         raise ValueError(f"unrecognized date format: {date_str}")
 
 
-def _next_occurrence(month: int, day: int, from_date: date) -> date:
+def next_occurrence(month: int, day: int, from_date: date) -> date:
     """Return the next occurrence of MM-DD on or after from_date. Feb 29 → Mar 1 in non-leap years."""
     year = from_date.year
     # Handle Feb 29 in non-leap years
@@ -74,7 +74,7 @@ def days_until_birthday(birthday_mmdd: str) -> int:
     """Days until next occurrence of MM-DD (0 = today)."""
     month, day, _ = parse_birthday(birthday_mmdd)
     today = today_et()
-    next_occ = _next_occurrence(month, day, today)
+    next_occ = next_occurrence(month, day, today)
     return (next_occ - today).days
 
 

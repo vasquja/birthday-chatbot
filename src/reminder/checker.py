@@ -1,29 +1,9 @@
 import os
-import calendar
 from datetime import date, timedelta
-from src.utils import today_et, now_et, format_date_display
+from src.utils import today_et, now_et, format_date_display, next_occurrence
 from src.reminder.tally import compute_tally
-from src.chat.cards import build_voting_closed_card, build_tally_card
-
-
-def _days_until(birthday_mmdd: str, from_date: date) -> int:
-    """Days until next occurrence of MM-DD from a given date (0 = today)."""
-    month, day = int(birthday_mmdd[:2]), int(birthday_mmdd[3:])
-    year = from_date.year
-    # Handle Feb 29 in non-leap years
-    if month == 2 and day == 29 and not calendar.isleap(year):
-        month, day = 3, 1
-    try:
-        candidate = date(year, month, day)
-    except ValueError:
-        candidate = date(year + 1, month, day)
-    if candidate < from_date:
-        next_year = year + 1
-        if month == 2 and day == 29 and not calendar.isleap(next_year):
-            candidate = date(next_year, 3, 1)
-        else:
-            candidate = date(next_year, month, day)
-    return (candidate - from_date).days
+from src.saturday import get_next_saturdays_after
+from src.chat.cards import build_voting_closed_card, build_tally_card, build_vote_card
 
 
 def run_reminders(birthdays_store, plans_store, chat_client, space_name: str = None):
@@ -36,7 +16,7 @@ def run_reminders(birthdays_store, plans_store, chat_client, space_name: str = N
         user_id = doc["user_id"]
         name = doc["display_name"]
         birthday = doc["birthday"]
-        days = _days_until(birthday, today)
+        days = (next_occurrence(int(birthday[:2]), int(birthday[3:]), today) - today).days
 
         # --- Birthday greeting (today) ---
         if days == 0:
@@ -88,9 +68,6 @@ def run_reminders(birthdays_store, plans_store, chat_client, space_name: str = N
 
         if winner is None and not tied:
             # All voted "none" — auto-reschedule
-            from src.saturday import get_next_saturdays_after
-            from src.chat.cards import build_vote_card
-
             last_sat = date.fromisoformat(plan["options"][-1])
             new_options = get_next_saturdays_after(last_sat)
             new_deadline = (now_et() + timedelta(hours=48)).isoformat()

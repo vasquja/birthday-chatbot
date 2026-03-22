@@ -95,6 +95,7 @@ def test_closes_expired_vote():
         "status": "voting",
         "options": ["2026-04-25", "2026-05-02", "2026-05-09"],
         "members": ["users/123", "users/456"],
+        "member_names": {"users/123": "Jason", "users/456": "Mike"},
         "votes": {"users/123": ["2026-05-02"], "users/456": ["2026-05-02"]},
         "tally_message_name": "spaces/AAA/messages/BBB",
         "voting_deadline": "2026-03-20T00:00:00",
@@ -102,10 +103,20 @@ def test_closes_expired_vote():
     }
     p_store.get_expired_voting_plans.return_value = [expired_plan]
     p_store.set_status_transaction.return_value = True
+    p_store.plan_id.return_value = "users-123-2026"
+    chat.post_message.return_value = {"name": "spaces/AAA/messages/NEW"}
 
     with patch("src.reminder.checker.today_et", return_value=date(2026, 3, 21)):
         run_reminders(b_store, p_store, chat, space_name="spaces/AAA")
 
-    p_store.set_status_transaction.assert_called_once()
-    # Tally card posted
-    assert chat.post_message.call_count >= 1
+    p_store.set_status_transaction.assert_called_once_with(
+        "users-123-2026", "voting", "tallied", {}
+    )
+    # Vote card should be disabled
+    chat.update_message.assert_called_once()
+    # Tally card posted (clear winner "2026-05-02")
+    chat.post_message.assert_called_once()
+    # Tally_message_name updated
+    p_store.update.assert_called_once()
+    update_data = p_store.update.call_args[0][1]
+    assert "tally_message_name" in update_data
