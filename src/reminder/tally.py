@@ -1,8 +1,7 @@
 def compute_tally(
     options: list[str],
-    votes: dict,
-    members: list[str],
-) -> tuple[str | None, list[str], dict]:
+    votes: dict[str, list[str]],
+) -> tuple[str | None, list[str], dict[str, list[str]]]:
     """
     Returns (winner, tied_dates, vote_counts).
     - winner: date string if one date has strictly most votes; None otherwise
