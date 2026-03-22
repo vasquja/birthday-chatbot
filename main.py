@@ -12,7 +12,7 @@ chat_client = None
 def _init_singletons():
     """Initialize GCP-backed singletons once per cold start."""
     global birthdays_store, plans_store, chat_client
-    if birthdays_store is not None:
+    if all(x is not None for x in (birthdays_store, plans_store, chat_client)):
         return
     from google.cloud import firestore
     from src.chat.client import build_chat_service, ChatClient
@@ -20,9 +20,13 @@ def _init_singletons():
     from src.firestore.dinner_plans_store import DinnerPlansStore
 
     db = firestore.Client(project=os.environ.get("GCP_PROJECT_ID"))
-    birthdays_store = BirthdaysStore(db)
-    plans_store = DinnerPlansStore(db)
-    chat_client = ChatClient(build_chat_service())
+    bs = BirthdaysStore(db)
+    ps = DinnerPlansStore(db)
+    cc = ChatClient(build_chat_service())
+    # Assign all at once after all constructors succeed
+    birthdays_store = bs
+    plans_store = ps
+    chat_client = cc
 
 
 # Slash command IDs (must match Google Cloud Console registration)
@@ -92,16 +96,17 @@ def _handle_card_click(function_name, event):
     from src.interactions.vote_handler import (
         handle_vote_toggle, handle_vote_none, handle_confirm, handle_pick_another
     )
-
-    if function_name == ACTION_VOTE_TOGGLE:
-        handle_vote_toggle(event, plans_store, chat_client)
-    elif function_name == ACTION_VOTE_NONE:
-        handle_vote_none(event, plans_store, chat_client)
-    elif function_name == ACTION_CONFIRM:
-        handle_confirm(event, plans_store, chat_client)
-    elif function_name == ACTION_PICK_ANOTHER:
-        handle_pick_another(event, plans_store, chat_client)
-
+    try:
+        if function_name == ACTION_VOTE_TOGGLE:
+            handle_vote_toggle(event, plans_store, chat_client)
+        elif function_name == ACTION_VOTE_NONE:
+            handle_vote_none(event, plans_store, chat_client)
+        elif function_name == ACTION_CONFIRM:
+            handle_confirm(event, plans_store, chat_client)
+        elif function_name == ACTION_PICK_ANOTHER:
+            handle_pick_another(event, plans_store, chat_client)
+    except Exception:
+        pass  # Always return {} to acknowledge the card click
     return {}
 
 
@@ -110,5 +115,7 @@ def reminder_checker(request):
     _init_singletons()
     from src.reminder.checker import run_reminders
     space_name = os.environ.get("CHAT_SPACE_NAME", "")
+    if not space_name:
+        return jsonify({"error": "CHAT_SPACE_NAME not set"}), 500
     run_reminders(birthdays_store, plans_store, chat_client, space_name=space_name)
     return jsonify({"status": "ok"}), 200

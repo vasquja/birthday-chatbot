@@ -1,4 +1,3 @@
-import json
 from unittest.mock import MagicMock, patch
 import pytest
 from flask import Flask
@@ -56,6 +55,8 @@ def test_bot_handler_add_birthday(mock_init):
     with _test_app.app_context():
         resp = bot_handler(req)
     assert resp[1] == 200
+    data = resp[0].get_json()
+    assert "text" in data
 
 
 @patch("main._init_singletons")
@@ -85,6 +86,7 @@ def test_bot_handler_card_click(mock_init):
 @patch("main._init_singletons")
 def test_reminder_checker_runs(mock_init):
     import main
+    import os
     main.birthdays_store = MagicMock()
     main.plans_store = MagicMock()
     main.chat_client = MagicMock()
@@ -93,5 +95,6 @@ def test_reminder_checker_runs(mock_init):
     from main import reminder_checker
     req = make_request({})
     with _test_app.app_context():
+        os.environ["CHAT_SPACE_NAME"] = "spaces/test"
         resp = reminder_checker(req)
     assert resp[1] == 200
