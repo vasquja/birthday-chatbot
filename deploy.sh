@@ -13,25 +13,25 @@ echo "Deploying bot_handler..."
 gcloud functions deploy bot_handler \
   --gen2 \
   --runtime=python311 \
-  --region=$REGION \
+  --region="$REGION" \
   --source=. \
   --entry-point=bot_handler \
-  --trigger=https \
+  --trigger-http \
   --allow-unauthenticated \
   --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,CHAT_SPACE_NAME=$SPACE_NAME,GOOGLE_PLACES_API_KEY=$PLACES_KEY" \
-  --project=$PROJECT_ID
+  --project="$PROJECT_ID"
 
 echo "Deploying reminder_checker..."
 gcloud functions deploy reminder_checker \
   --gen2 \
   --runtime=python311 \
-  --region=$REGION \
+  --region="$REGION" \
   --source=. \
   --entry-point=reminder_checker \
-  --trigger=https \
+  --trigger-http \
   --no-allow-unauthenticated \
   --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,CHAT_SPACE_NAME=$SPACE_NAME,GOOGLE_PLACES_API_KEY=$PLACES_KEY" \
-  --project=$PROJECT_ID
+  --project="$PROJECT_ID"
 
 echo ""
 echo "Done! Copy the bot_handler URL into Google Cloud Console → Google Chat API → App configuration."
