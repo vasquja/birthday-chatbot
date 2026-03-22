@@ -49,7 +49,8 @@ def test_voting_closed_card():
     assert "cardsV2" in card
     assert "closed" in str(card).lower()
     # Buttons are disabled but still rendered
-    assert "disabled" in str(card)
+    buttons = card["cardsV2"][0]["card"]["sections"][1]["widgets"][0]["buttonList"]["buttons"]
+    assert all(b["disabled"] is True for b in buttons)
     assert "Apr 25" in str(card)
 
 

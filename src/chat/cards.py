@@ -163,12 +163,13 @@ def build_restaurant_card(restaurants, date=None):
                 url += f"&date={date}"
             buttons.append({"text": "Reserve on Resy", "onClick": {"openLink": {"url": url}}})
 
+        widgets = [{"textParagraph": {"text": subtitle}}]
+        if buttons:
+            widgets.append({"buttonList": {"buttons": buttons}})
+
         sections.append({
             "header": header,
-            "widgets": [
-                {"textParagraph": {"text": subtitle}},
-                {"buttonList": {"buttons": buttons}},
-            ],
+            "widgets": widgets,
         })
 
     return {
