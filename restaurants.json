@@ -1,0 +1,17 @@
+[
+  {"name": "Peter Luger Steak House", "neighborhood": "Williamsburg", "google_rating": 4.5, "price_level": 4, "opentable_id": "4246", "resy_slug": null},
+  {"name": "Keens Chophouse", "neighborhood": "Midtown", "google_rating": 4.6, "price_level": 4, "opentable_id": "65027", "resy_slug": null},
+  {"name": "Quality Meats", "neighborhood": "Midtown", "google_rating": 4.4, "price_level": 3, "opentable_id": "118988", "resy_slug": "quality-meats-ny"},
+  {"name": "Gallagher's Steakhouse", "neighborhood": "Midtown", "google_rating": 4.3, "price_level": 4, "opentable_id": "1077", "resy_slug": null},
+  {"name": "The Capital Grille", "neighborhood": "Midtown", "google_rating": 4.6, "price_level": 4, "opentable_id": "2986", "resy_slug": null},
+  {"name": "Wolfgang's Steakhouse", "neighborhood": "Tribeca", "google_rating": 4.5, "price_level": 4, "opentable_id": "35702", "resy_slug": null},
+  {"name": "Minetta Tavern", "neighborhood": "Greenwich Village", "google_rating": 4.4, "price_level": 3, "opentable_id": null, "resy_slug": "minetta-tavern-new-york"},
+  {"name": "Smith & Wollensky", "neighborhood": "Midtown", "google_rating": 4.3, "price_level": 4, "opentable_id": "1695", "resy_slug": null},
+  {"name": "Catch Steak", "neighborhood": "Meatpacking District", "google_rating": 4.4, "price_level": 3, "opentable_id": null, "resy_slug": "catch-steak-new-york"},
+  {"name": "STK Steakhouse", "neighborhood": "Midtown", "google_rating": 4.3, "price_level": 3, "opentable_id": "148138", "resy_slug": "stk-steakhouse-midtown-new-york"},
+  {"name": "Black Iron Burger", "neighborhood": "East Village", "google_rating": 4.4, "price_level": 2, "opentable_id": "349952", "resy_slug": null},
+  {"name": "Porter House Bar and Grill", "neighborhood": "Midtown", "google_rating": 4.4, "price_level": 4, "opentable_id": "31350", "resy_slug": "porter-house-bar-and-grill-new-york"},
+  {"name": "Cote Korean Steakhouse", "neighborhood": "Flatiron", "google_rating": 4.5, "price_level": 3, "opentable_id": null, "resy_slug": "cote-new-york"},
+  {"name": "The Smith", "neighborhood": "Midtown East", "google_rating": 4.3, "price_level": 2, "opentable_id": "62701", "resy_slug": null},
+  {"name": "Lure Fishbar", "neighborhood": "SoHo", "google_rating": 4.3, "price_level": 3, "opentable_id": "60220", "resy_slug": null}
+]
