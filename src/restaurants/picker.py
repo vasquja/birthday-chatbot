@@ -2,8 +2,9 @@ import json
 import os
 import random
 import requests
+from pathlib import Path
 
-RESTAURANTS_FILE = os.path.join(os.path.dirname(__file__), "../../restaurants.json")
+RESTAURANTS_FILE = Path(__file__).resolve().parents[2] / "restaurants.json"
 PLACES_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
 
@@ -46,11 +47,12 @@ def pick_restaurants(date: str = None, api_key: str = None) -> list[dict]:
 
     try:
         places = search_places(api_key)
-        if places:
-            top_place = places[0]
+        for place in places:
+            has_link = place.get("opentable_id") or place.get("resy_slug")
             curated_names = {r["name"].lower() for r in picks}
-            if top_place["name"].lower() not in curated_names:
-                picks[2] = top_place
+            if has_link and place["name"].lower() not in curated_names:
+                picks[2] = place
+                break
     except Exception:
         pass  # Fall back to curated only
 

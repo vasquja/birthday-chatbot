@@ -1,5 +1,5 @@
 # tests/test_picker.py
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pytest
 from src.restaurants.picker import load_restaurants, pick_restaurants, build_reservation_links
 
@@ -9,6 +9,8 @@ def test_load_restaurants():
     assert len(restaurants) >= 10
     for r in restaurants:
         assert "name" in r
+        # Every restaurant must have at least one booking platform link
+        assert r.get("opentable_id") or r.get("resy_slug"), f"{r['name']} has no reservation links"
 
 
 def test_pick_restaurants_returns_three():
@@ -17,11 +19,12 @@ def test_pick_restaurants_returns_three():
     assert len(result) == 3
 
 
-def test_pick_restaurants_all_different():
+def test_pick_restaurants_results_have_correct_structure():
     with patch("src.restaurants.picker.search_places", return_value=[]):
-        r1 = pick_restaurants()
-        r2 = pick_restaurants()
-    assert all("name" in r for r in r1)
+        result = pick_restaurants()
+    assert all("name" in r for r in result)
+    assert all("neighborhood" in r for r in result)
+    assert all("google_rating" in r for r in result)
 
 
 def test_pick_restaurants_places_supplements():
@@ -29,8 +32,8 @@ def test_pick_restaurants_places_supplements():
                       "price_level": 3, "opentable_id": "99999", "resy_slug": None}]
     with patch("src.restaurants.picker.search_places", return_value=places_result):
         result = pick_restaurants()
-    names = [r["name"] for r in result]
-    assert "New Hot Spot" in names
+    # Places result with booking link should be substituted at position 2
+    assert result[2]["name"] == "New Hot Spot"
 
 
 def test_pick_restaurants_places_api_error():
