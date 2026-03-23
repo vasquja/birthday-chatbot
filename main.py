@@ -49,25 +49,55 @@ ACTION_PICK_ANOTHER = "handle_pick_another"
 def bot_handler(request):
     _init_singletons()
     event = request.get_json(silent=True) or {}
-    event_type = event.get("type")
-    logging.warning("bot_handler raw event: %s", event)
 
-    if event_type == "MESSAGE":
+    # Google Chat API uses a nested format: all data is under event['chat']
+    chat = event.get("chat", {})
+
+    if "appCommandPayload" in chat:
+        # Slash command (new format)
+        payload = chat["appCommandPayload"]
+        metadata = payload.get("appCommandMetadata", {})
+        cmd_id = int(metadata.get("appCommandId", 0))
+        # Normalize to the shape our handlers expect
+        normalized = {
+            "type": "MESSAGE",
+            "message": payload.get("message", {}),
+            "space": payload.get("space", {}),
+            "user": chat.get("user", {}),
+        }
+        response = _handle_slash(cmd_id, normalized)
+
+    elif "interactiveDataPayload" in chat:
+        # Card button click (new format)
+        payload = chat["interactiveDataPayload"]
+        action = payload.get("invokedFunction", "")
+        params = {p["key"]: p["value"] for p in payload.get("parameters", [])}
+        normalized = {
+            "action": {"function": action, "parameters": payload.get("parameters", [])},
+            "common": {"parameters": params},
+            "space": chat.get("appCommandPayload", {}).get("space", {}),
+            "user": chat.get("user", {}),
+        }
+        response = _handle_card_click(action, normalized)
+
+    elif "addedToSpacePayload" in chat:
+        response = {"text": "Hi! I'm the birthday bot. Use `/help` to see what I can do."}
+
+    elif event.get("type") == "MESSAGE":
+        # Legacy event format (used in tests)
         slash = event.get("message", {}).get("slashCommand", {})
-        cmd_id = slash.get("commandId")
-        logging.info("Received slash command: event_type=%s cmd_id=%r type=%s", event_type, cmd_id, type(cmd_id).__name__)
-        if isinstance(cmd_id, str):
-            cmd_id = int(cmd_id)
+        cmd_id = int(slash.get("commandId", 0))
         response = _handle_slash(cmd_id, event)
 
-    elif event_type == "CARD_CLICKED":
+    elif event.get("type") == "CARD_CLICKED":
         function_name = event.get("action", {}).get("function", "")
         response = _handle_card_click(function_name, event)
 
-    elif event_type == "ADDED_TO_SPACE":
+    elif event.get("type") == "ADDED_TO_SPACE":
         response = {"text": "Hi! I'm the birthday bot. Use `/help` to see what I can do."}
 
     else:
+        logging.warning("Unhandled event chat keys: %s", list(chat.keys()))
         response = {}
 
     return jsonify(response), 200
