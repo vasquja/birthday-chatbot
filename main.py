@@ -65,7 +65,9 @@ def bot_handler(request):
             "space": payload.get("space", {}),
             "user": chat.get("user", {}),
         }
-        response = _handle_slash(cmd_id, normalized)
+        msg = _handle_slash(cmd_id, normalized)
+        # New API requires response wrapped in hostAppDataAction envelope
+        response = {"hostAppDataAction": {"chatDataAction": {"createMessageAction": {"message": msg}}}}
 
     elif "interactiveDataPayload" in chat:
         # Card button click (new format)
@@ -81,7 +83,8 @@ def bot_handler(request):
         response = _handle_card_click(action, normalized)
 
     elif "addedToSpacePayload" in chat:
-        response = {"text": "Hi! I'm the birthday bot. Use `/help` to see what I can do."}
+        msg = {"text": "Hi! I'm the birthday bot. Use `/help` to see what I can do."}
+        response = {"hostAppDataAction": {"chatDataAction": {"createMessageAction": {"message": msg}}}}
 
     elif event.get("type") == "MESSAGE":
         # Legacy event format (used in tests)
