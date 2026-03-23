@@ -69,9 +69,10 @@ def bot_handler(request):
         # New API requires response wrapped in hostAppDataAction envelope
         response = {"hostAppDataAction": {"chatDataAction": {"createMessageAction": {"message": msg}}}}
 
-    elif "interactiveDataPayload" in chat:
-        # Card button click (new format)
-        payload = chat["interactiveDataPayload"]
+    elif "interactiveDataPayload" in chat or "buttonClickedPayload" in chat or "widgetUpdatedPayload" in chat:
+        # Card button click (new format) — log keys to confirm structure
+        logging.warning("card click chat keys: %s full: %s", list(chat.keys()), chat)
+        payload = chat.get("interactiveDataPayload") or chat.get("buttonClickedPayload") or chat.get("widgetUpdatedPayload") or {}
         action = payload.get("invokedFunction", "")
         params = {p["key"]: p["value"] for p in payload.get("parameters", [])}
         normalized = {
@@ -100,7 +101,7 @@ def bot_handler(request):
         response = {"text": "Hi! I'm the birthday bot. Use `/help` to see what I can do."}
 
     else:
-        logging.warning("Unhandled event chat keys: %s", list(chat.keys()))
+        logging.warning("Unhandled event chat keys: %s full: %s", list(chat.keys()), chat)
         response = {}
 
     return jsonify(response), 200
