@@ -50,10 +50,14 @@ def bot_handler(request):
     _init_singletons()
     event = request.get_json(silent=True) or {}
     event_type = event.get("type")
+    logging.info("bot_handler received event_type=%r", event_type)
 
     if event_type == "MESSAGE":
         slash = event.get("message", {}).get("slashCommand", {})
         cmd_id = slash.get("commandId")
+        logging.info("Received slash command: event_type=%s cmd_id=%r type=%s", event_type, cmd_id, type(cmd_id).__name__)
+        if isinstance(cmd_id, str):
+            cmd_id = int(cmd_id)
         response = _handle_slash(cmd_id, event)
 
     elif event_type == "CARD_CLICKED":
