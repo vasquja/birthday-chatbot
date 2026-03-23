@@ -50,7 +50,7 @@ def bot_handler(request):
     _init_singletons()
     event = request.get_json(silent=True) or {}
     event_type = event.get("type")
-    logging.info("bot_handler received event_type=%r", event_type)
+    logging.warning("bot_handler raw event: %s", event)
 
     if event_type == "MESSAGE":
         slash = event.get("message", {}).get("slashCommand", {})
